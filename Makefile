@@ -1,4 +1,4 @@
-PROJECT = modelark
+PROJECT = schedulark
 COVFILE ?= .coverage
 PART ?= patch
 
