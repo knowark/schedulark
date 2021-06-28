@@ -31,7 +31,7 @@ from schedulark import Scheduler
 
 
 scheduler = Scheduler()
-scheduler.register(MaintenanceJob())
+scheduler.register(MaintenanceJob)
 ```
 
 
