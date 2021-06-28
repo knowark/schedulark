@@ -7,6 +7,17 @@ def test_scheduler_instantiation():
     assert scheduler is not None
 
 
+def test_scheduler_time():
+    scheduler = Scheduler()
+
+    assert scheduler.time() > 0
+
+    def fake_time(): return 1624898475
+    scheduler = Scheduler(time=fake_time)
+
+    assert scheduler.time() == 1624898475
+
+
 def test_scheduler_register():
     class AlphaJob(Job):
         pass
