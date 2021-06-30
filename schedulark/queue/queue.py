@@ -1,17 +1,21 @@
 from typing import Optional
 from abc import ABC, abstractmethod
-from ..job import Job
+from ..task import Task
 
 
 class Queue(ABC):
 
     @abstractmethod
-    async def put(self, job: Job) -> None:
+    async def put(self, task: Task) -> None:
         """Put method to be implemented"""
 
     @abstractmethod
-    async def pop(self) -> Optional[Job]:
-        """Pop method to be implemented"""
+    async def pick(self) -> Optional[Task]:
+        """Retain method to be implemented"""
+
+    @abstractmethod
+    async def remove(self, task: Task) -> None:
+        """Remove method to be implemented"""
 
     @abstractmethod
     async def size(self) -> int:

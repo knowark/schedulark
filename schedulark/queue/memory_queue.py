@@ -1,17 +1,31 @@
-from typing import List, Optional
-from ..job import Job
+import time
+from typing import Dict, Optional
+from ..task import Task
 from .queue import Queue
 
 
 class MemoryQueue(Queue):
     def __init__(self) -> None:
-        self.content: List[Job] = []
+        self.content: Dict[str, Task] = {}
 
-    async def put(self, job: Job) -> None:
-        self.content.insert(0, job)
+    async def put(self, task: Task) -> None:
+        self.content[task.id] = task
 
-    async def pop(self) -> Optional[Job]:
-        return self.content and self.content.pop() or None
+    async def pick(self) -> Optional[Task]:
+        tasks = [task for task in self.content.values()
+                 if not task.picked_at]
+
+        if not tasks:
+            return None
+
+        tasks.sort(key=lambda task: task.scheduled_at)
+        task = tasks.pop(0)
+        task.picked_at = int(time.time())
+        return task
+
+    async def remove(self, task: Task) -> None:
+        if task.id in self.content:
+            del self.content[task.id]
 
     async def size(self) -> int:
         return len(self.content)

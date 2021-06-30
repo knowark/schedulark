@@ -1,5 +1,5 @@
 from pytest import mark
-from schedulark.job import Job
+from schedulark.task import Task
 from schedulark.queue import Queue, MemoryQueue
 
 
@@ -15,54 +15,73 @@ def test_memory_queue_instantiation():
 async def test_memory_queue_put():
     queue = MemoryQueue()
 
-    job_1 = Job()
-    job_2 = Job()
-    job_3 = Job()
+    task_1 = Task(id='T001')
+    task_2 = Task(id='T002')
+    task_3 = Task(id='T003')
 
-    await queue.put(job_1)
-    await queue.put(job_2)
-    await queue.put(job_3)
+    await queue.put(task_1)
+    await queue.put(task_2)
+    await queue.put(task_3)
 
-    assert queue.content == [job_3, job_2, job_1]
+    assert task_1.id in queue.content
+    assert task_2.id in queue.content
+    assert task_3.id in queue.content
 
 
-async def test_memory_queue_pop():
+async def test_memory_queue_pick():
     queue = MemoryQueue()
-    assert await queue.pop() is None
+    queue.content = {
+        'T001': Task(id='T001', scheduled_at=1_625_075_800),
+        'T002': Task(id='T002', scheduled_at=1_625_075_400),
+        'T003': Task(id='T003', scheduled_at=1_625_075_700)
+    }
 
-    job_1 = Job()
-    job_2 = Job()
-    job_3 = Job()
+    task = await queue.pick()
+    assert task.id == 'T002'
 
-    queue.content = [job_3, job_2, job_1]
+    task = await queue.pick()
+    assert task.id == 'T003'
 
-    job = await queue.pop()
+    task = await queue.pick()
+    assert task.id == 'T001'
 
-    assert job is job_1
-    assert queue.content == [job_3, job_2]
+    task = await queue.pick()
+    assert task is None
+
+
+async def test_memory_queue_remove():
+    task_1 = Task(id='T001')
+
+    queue = MemoryQueue()
+    queue.content = {
+        'T001': task_1
+    }
+
+    await queue.remove(task_1)
+    await queue.remove(task_1)
+
+    assert queue.content == {}
 
 
 async def test_memory_queue_size():
     queue = MemoryQueue()
-
-    job_1 = Job()
-    job_2 = Job()
-    job_3 = Job()
-
-    queue.content = [job_3, job_2, job_1]
+    queue.content = {
+        'T001': Task(id='T001'),
+        'T002': Task(id='T002'),
+        'T003': Task(id='T003')
+    }
 
     assert await queue.size() == 3
 
 
 async def test_memory_queue_clear():
     queue = MemoryQueue()
-
-    job_1 = Job()
-    job_2 = Job()
-    job_3 = Job()
-
-    queue.content = [job_3, job_2, job_1]
+    queue.content = {
+        'T001': Task(id='T001'),
+        'T002': Task(id='T002'),
+        'T003': Task(id='T003')
+    }
 
     await queue.clear()
 
-    assert queue.content == []
+    assert queue.content == {}
