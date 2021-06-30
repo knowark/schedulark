@@ -46,6 +46,9 @@ async def test_scheduler_defer():
     scheduler.registry['AlphaJob'] = AlphaJob()
     queue = scheduler.queue
 
-    await scheduler.defer('AlphaJob')
+    data = {'hello': 'world'}
+    await scheduler.defer('AlphaJob', data)
 
+    task = await queue.pick()
     assert await queue.size() == 1
+    assert task.data == data
