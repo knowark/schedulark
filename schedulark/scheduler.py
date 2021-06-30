@@ -17,6 +17,6 @@ class Scheduler:
     def register(self, job: Job) -> None:
         self.registry[job.__class__.__name__] = job
 
-    async def schedule(self, job: str, data: Dict = None) -> None:
+    async def defer(self, job: str, data: Dict = None) -> None:
         task = Task(job=job, data=data)
         await self.queue.put(task)

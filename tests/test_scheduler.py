@@ -38,7 +38,7 @@ def test_scheduler_register():
     assert scheduler.registry['BetaJob'].__class__ == BetaJob
 
 
-async def test_scheduler_schedule():
+async def test_scheduler_defer():
     class AlphaJob(Job):
         pass
 
@@ -46,6 +46,6 @@ async def test_scheduler_schedule():
     scheduler.registry['AlphaJob'] = AlphaJob()
     queue = scheduler.queue
 
-    await scheduler.schedule('AlphaJob')
+    await scheduler.defer('AlphaJob')
 
     assert await queue.size() == 1
