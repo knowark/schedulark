@@ -7,8 +7,8 @@ class Task:
         self.id = attributes.get('id', uuid4())
         self.job = attributes.get('job', '')
         self.created_at = attributes.get('created_at', int(time()))
-        self.scheduled_at = attributes.get('scheduled_at', 0)
-        self.picked_at = attributes.get('picked_at', None)
-        self.expired_at = attributes.get('expired_at', None)
+        self.scheduled_at = attributes.get('scheduled_at', int(time()))
+        self.picked_at = attributes.get('picked_at', 0)
+        self.expired_at = attributes.get('expired_at', 0)
         self.attempts = attributes.get('attempts', 0)
-        self.data = attributes.get('data', {})
+        self.data = attributes.get('data') or {}
