@@ -5,7 +5,7 @@ from .task import Task
 from .queue import Queue, MemoryQueue
 
 
-class Scheduler:
+class Schedulark:
     def __init__(self, queue=None, time_=None) -> None:
         self.registry: Dict[str, Job] = {}
         self.queue = queue or MemoryQueue()

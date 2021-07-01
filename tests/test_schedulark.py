@@ -1,23 +1,23 @@
 from pytest import mark
-from schedulark import Scheduler, Job
+from schedulark import Schedulark, Job
 
 
 pytestmark = mark.asyncio
 
 
 def test_scheduler_instantiation():
-    scheduler = Scheduler()
+    scheduler = Schedulark()
 
     assert scheduler is not None
 
 
 def test_scheduler_time():
-    scheduler = Scheduler()
+    scheduler = Schedulark()
 
     assert scheduler.time() > 0
 
     def fake_time(): return 1624898475
-    scheduler = Scheduler(time_=fake_time)
+    scheduler = Schedulark(time_=fake_time)
 
     assert scheduler.time() == 1624898475
 
@@ -29,7 +29,7 @@ def test_scheduler_register():
     class BetaJob(Job):
         pass
 
-    scheduler = Scheduler()
+    scheduler = Schedulark()
 
     scheduler.register(AlphaJob())
     scheduler.register(BetaJob())
@@ -42,7 +42,7 @@ async def test_scheduler_defer():
     class AlphaJob(Job):
         pass
 
-    scheduler = Scheduler()
+    scheduler = Schedulark()
     scheduler.registry['AlphaJob'] = AlphaJob()
     queue = scheduler.queue
 

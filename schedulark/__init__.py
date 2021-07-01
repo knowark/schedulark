@@ -1,2 +1,2 @@
-from .scheduler import Scheduler
+from .schedulark import Schedulark
 from .job import Job
