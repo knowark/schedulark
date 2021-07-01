@@ -11,17 +11,6 @@ def test_scheduler_instantiation():
     assert scheduler is not None
 
 
-def test_scheduler_time():
-    scheduler = Schedulark()
-
-    assert scheduler.time() > 0
-
-    def fake_time(): return 1624898475
-    scheduler = Schedulark(time_=fake_time)
-
-    assert scheduler.time() == 1624898475
-
-
 def test_scheduler_register():
     class AlphaJob(Job):
         pass
@@ -52,3 +41,23 @@ async def test_scheduler_defer():
     task = await queue.pick()
     assert await queue.size() == 1
     assert task.data == data
+
+
+async def test_scheduler_schedule():
+    class AlphaJob(Job):
+        frequency = '* * * * *'
+
+    class BetaJob(Job):
+        pass
+
+    scheduler = Schedulark()
+    scheduler.register(AlphaJob())
+    scheduler.register(BetaJob())
+
+    assert len(scheduler.queue.content) == 0
+
+    await scheduler.schedule()
+
+    assert len(scheduler.queue.content) == 1
+    task = next(iter(scheduler.queue.content.values()))
+    assert task.job == 'AlphaJob'
