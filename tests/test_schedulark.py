@@ -61,3 +61,26 @@ async def test_scheduler_schedule():
     assert len(scheduler.queue.content) == 1
     task = next(iter(scheduler.queue.content.values()))
     assert task.job == 'AlphaJob'
+
+
+async def test_scheduler_time():
+    class AlphaJob(Job):
+        frequency = '* * * * *'
+
+    class BetaJob(Job):
+        pass
+
+    scheduler = Schedulark()
+    scheduler.register(AlphaJob())
+    scheduler.register(BetaJob())
+    scheduler.iterations = -3
+    scheduler.tick = 0.01
+
+    assert len(scheduler.queue.content) == 0
+
+    await scheduler.time()
+
+    assert len(scheduler.queue.content) == 2
+    tasks = iter(scheduler.queue.content.values())
+    assert next(tasks).job == 'AlphaJob'
+    assert next(tasks).job == 'AlphaJob'
