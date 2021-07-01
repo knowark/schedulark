@@ -1,0 +1,1 @@
+from .migrations import SETTINGS_TABLE, VERSION_KEY, TASKS_TABLE

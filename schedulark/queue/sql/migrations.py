@@ -1,0 +1,3 @@
+VERSION_KEY = 'SCHEDULARK_DBVERSION'
+SETTINGS_TABLE = '__settings__'
+TASKS_TABLE = '__tasks__'
