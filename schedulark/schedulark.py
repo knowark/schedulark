@@ -3,12 +3,15 @@ from typing import Type, Dict
 from .job import Job, cronable
 from .task import Task
 from .queue import Queue, MemoryQueue
+from .worker import Worker
 
 
 class Schedulark:
-    def __init__(self, queue=None, time_=None) -> None:
+    def __init__(self, queue=None) -> None:
         self.registry: Dict[str, Job] = {}
         self.queue = queue or MemoryQueue()
+        self.worker = Worker(self.registry, self.queue)
+        self.tick = 60
 
     def register(self, job: Job) -> None:
         self.registry[job.__class__.__name__] = job
