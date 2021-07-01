@@ -1,7 +1,7 @@
 import time
 from typing import Dict, Optional
-from ..task import Task
-from .queue import Queue
+from ...task import Task
+from ..queue import Queue
 
 
 class MemoryQueue(Queue):
