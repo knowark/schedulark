@@ -1,3 +1,4 @@
 VERSION_KEY = 'SCHEDULARK_DBVERSION'
 SETTINGS_TABLE = '__settings__'
+TASKS_SCHEMA = 'public'
 TASKS_TABLE = '__tasks__'
