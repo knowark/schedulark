@@ -1,4 +1,4 @@
-from typing import Protocol, List, Mapping
+from typing import Protocol, List, Mapping, AsyncContextManager
 
 
 class Connection(Protocol):
@@ -7,6 +7,9 @@ class Connection(Protocol):
 
     async def fetch(self, query: str, *args, **kwargs) -> List[Mapping]:
         """Fetch the given query records"""
+
+    def transaction(self) ->  AsyncContextManager:
+        """Start a connection transaction"""
 
 
 class Connector(Protocol):

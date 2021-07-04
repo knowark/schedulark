@@ -1,7 +1,8 @@
 from typing import List, Dict, Tuple, Mapping, Any
-from inspect import cleandoc
 from json import dumps
+from inspect import cleandoc
 from uuid import UUID
+from contextlib import AsyncExitStack
 from pytest import mark, fixture
 from schedulark.task import Task
 from schedulark.queue import Queue, SqlQueue
@@ -33,6 +34,9 @@ def mock_connector():
             self.fetch_args = args
             return self.fetch_result
 
+        def transaction(self):
+            return AsyncExitStack()
+
         def load(self, data) -> None:
             self.data = data
 
@@ -53,7 +57,7 @@ def mock_connector():
     return MockConnector()
 
 
-def test_sql_queue_instantiation(mock_connector):
+async def test_sql_queue_instantiation(mock_connector):
     queue = SqlQueue(mock_connector)
 
     assert isinstance(queue, Queue)

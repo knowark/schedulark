@@ -1,4 +1,6 @@
 import time
+import asyncio
+import threading
 from json import dumps
 from uuid import UUID
 from typing import Mapping, Dict, Optional
@@ -6,7 +8,7 @@ from ...task import Task
 from ..queue import Queue
 from .connector import Connector
 from .migrations import (
-    SETTINGS_TABLE, VERSION_KEY, TASKS_SCHEMA, TASKS_TABLE)
+    migrate, TASKS_SCHEMA, TASKS_TABLE)
 
 
 class SqlQueue(Queue):
@@ -14,6 +16,13 @@ class SqlQueue(Queue):
         self.connector = connector
         self.table = TASKS_TABLE
         self.schema = TASKS_SCHEMA
+        self.setup()
+
+    def setup(self):
+        def _setup(): asyncio.run(migrate(self.connector))
+        setup_thread = threading.Thread(target=_setup)
+        setup_thread.start()
+        setup_thread.join()
 
     async def put(self, task: Task) -> None:
         query = f"""
