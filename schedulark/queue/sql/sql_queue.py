@@ -16,13 +16,9 @@ class SqlQueue(Queue):
         self.connector = connector
         self.table = TASKS_TABLE
         self.schema = TASKS_SCHEMA
-        self.setup()
 
-    def setup(self):
-        def _setup(): asyncio.run(migrate(self.connector))
-        setup_thread = threading.Thread(target=_setup)
-        setup_thread.start()
-        setup_thread.join()
+    async def setup(self):
+        await migrate(self.connector)
 
     async def put(self, task: Task) -> None:
         query = f"""

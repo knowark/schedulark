@@ -185,3 +185,12 @@ async def test_sql_queue_clear(mock_connector):
         """
         DELETE FROM public.__tasks__
         """)
+
+
+async def test_sql_queue_setup(mock_connector):
+    queue = SqlQueue(mock_connector)
+
+    await queue.setup()
+    connection = queue.connector.connection
+
+    assert len(connection.fetch_query) > 0

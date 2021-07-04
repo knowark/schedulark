@@ -40,3 +40,6 @@ class Schedulark:
             await asyncio.sleep(delay)
             await self.schedule()
             self.iterations += 1
+
+    async def setup(self) -> None:
+        await self.queue.setup()

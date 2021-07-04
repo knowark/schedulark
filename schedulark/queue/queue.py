@@ -5,6 +5,9 @@ from ..task import Task
 
 class Queue(ABC):
 
+    async def setup(self) -> None:
+        """Optional setup procedures"""
+
     @abstractmethod
     async def put(self, task: Task) -> None:
         """Put method to be implemented"""

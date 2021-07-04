@@ -84,3 +84,9 @@ async def test_scheduler_time():
     tasks = iter(scheduler.queue.content.values())
     assert next(tasks).job == 'AlphaJob'
     assert next(tasks).job == 'AlphaJob'
+
+
+async def test_scheduler_setup():
+    scheduler = Schedulark()
+    await scheduler.setup()
+    assert scheduler is not None
