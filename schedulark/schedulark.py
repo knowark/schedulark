@@ -1,8 +1,7 @@
 import asyncio
 from datetime import datetime, timezone, timedelta
 from typing import Type, Tuple, Dict, Callable
-from .job import Job, cronable
-from .task import Task
+from .task import Task, Job, cronable
 from .queue import Queue, MemoryQueue
 from .worker import Worker, Registry
 

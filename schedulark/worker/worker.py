@@ -1,6 +1,6 @@
 import asyncio
 from typing import Type, Tuple, Dict, Callable
-from ..job import Job
+from ..task import Job
 from ..queue import Queue
 
 

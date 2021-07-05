@@ -1,4 +1,3 @@
 from .schedulark import Schedulark
-from .job import Job
-from .task import Task
+from .task import Task, Job
 from .queue import Queue, MemoryQueue, SqlQueue
