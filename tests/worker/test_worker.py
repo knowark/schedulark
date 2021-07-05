@@ -9,19 +9,21 @@ from schedulark.worker import Worker
 pytestmark = mark.asyncio
 
 
-class AlphaJob(Job):
-    pass
+class AlphaJob:
+    async def __call__(self, task: Task) -> Dict:
+        return {}
 
 
-class BetaJob(Job):
-    pass
+class BetaJob:
+    async def __call__(self, task: Task) -> Dict:
+        return {}
 
 
 @fixture
 def registry():
     return {
-        'AlphaJob': AlphaJob(),
-        'BetaJob': BetaJob()
+        'AlphaJob': (AlphaJob(), ''),
+        'BetaJob': (BetaJob(), '')
     }
 
 
@@ -48,13 +50,13 @@ def test_worker_instantiation(registry, queue):
 async def test_worker_start(registry, queue):
     executed_tasks = []
 
-    class AlphaJob(Job):
-        async def execute(self, task: Task) -> Dict:
+    class AlphaJob:
+        async def __call__(self, task: Task) -> Dict:
             nonlocal executed_tasks
             executed_tasks.append(task)
             return {}
 
-    registry['AlphaJob'] = AlphaJob()
+    registry['AlphaJob'] = (AlphaJob(), '')
 
     worker = Worker(registry, queue)
     worker.iterations = -5

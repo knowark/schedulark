@@ -1,22 +1,25 @@
 import asyncio
 from datetime import datetime, timezone, timedelta
-from typing import Type, Dict
+from typing import Type, Tuple, Dict, Callable
 from .job import Job, cronable
 from .task import Task
 from .queue import Queue, MemoryQueue
-from .worker import Worker
+from .worker import Worker, Registry
 
 
 class Schedulark:
     def __init__(self, queue=None) -> None:
-        self.registry: Dict[str, Job] = {}
+        self.registry: Registry = {}
         self.queue = queue or MemoryQueue()
         self.worker = Worker(self.registry, self.queue)
         self.iterations = 0
         self.tick = 60
 
-    def register(self, job: Job) -> None:
-        self.registry[job.__class__.__name__] = job
+    def register(
+        self, job: Callable, frequency: str = '', name: str = ''
+    ) -> None:
+        name = name or getattr(job, '__name__', job.__class__.__name__)
+        self.registry[name] = (job, frequency)
 
     async def defer(self, job: str, data: Dict = None) -> None:
         task = Task(job=job, data=data)
@@ -24,10 +27,10 @@ class Schedulark:
 
     async def schedule(self) -> None:
         moment = datetime.now(timezone.utc)
-        for job in self.registry.values():
-            if not cronable(job.frequency, moment):
+        for job, (callback, frequency) in self.registry.items():
+            if not cronable(frequency, moment):
                 continue
-            task = Task(job=job.__class__.__name__)
+            task = Task(job=job)
             await self.queue.put(task)
 
     async def time(self) -> None:

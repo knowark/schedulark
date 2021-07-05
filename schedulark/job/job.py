@@ -1,10 +1,7 @@
-from typing import Dict
+from typing import Dict, Protocol
 from ..task import Task
 
 
-class Job:
-
-    frequency = ''
-
-    async def execute(self, task: Task) -> Dict:
-        return {}
+class Job(Protocol):
+    async def __call__(self, task: Task) -> Dict:
+        """Job callback to be executed."""
