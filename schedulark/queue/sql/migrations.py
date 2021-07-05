@@ -26,14 +26,18 @@ async def apply_migration(current, target, migration, connection) -> None:
         return None
     await migration(connection)
     table = f'{TASKS_SCHEMA}.{SETTINGS_TABLE}'
-    await connection.execute(
-        f'UPDATE {table} SET value = $1 WHERE key = $2', target, VERSION_KEY)
+    await connection.execute(f"""
+    INSERT INTO {table} (key, value)
+        VALUES ($1, $2)
+        ON CONFLICT (key)
+        DO UPDATE SET value = EXCLUDED.value
+    """, VERSION_KEY, target)
 
 
 async def get_version(connection: Connection) -> str:
     table = f'{TASKS_SCHEMA}.{SETTINGS_TABLE}'
     await connection.execute(
-        f'CREATE TABLE IF NOT EXISTS {table} (key TEXT, value TEXT)')
+        f'CREATE TABLE IF NOT EXISTS {table} (key TEXT UNIQUE, value TEXT)')
     result = await connection.fetch(
         f'SELECT key, value FROM {table} WHERE key = $1', VERSION_KEY)
     row = next(iter(result), {'value': '000'})
@@ -51,6 +55,5 @@ async def migration_001(connection: Connection):
         expired_at TIMESTAMP,
         job TEXT,
         attempts INTEGER,
-        data JSONB
-    )
+        data JSONB)
     """)
