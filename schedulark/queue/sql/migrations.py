@@ -42,14 +42,15 @@ async def get_version(connection: Connection) -> str:
 
 async def migration_001(connection: Connection):
     table = f'{TASKS_SCHEMA}.{TASKS_TABLE}'
-    await connection.execute(
-        f'CREATE TABLE IF NOT EXISTS {table} ('
-        'id UUID PRIMARY KEY, '
-        'created_at TIMESTAMP, '
-        'scheduled_at TIMESTAMP, '
-        'picked_at TIMESTAMP, '
-        'expired_at TIMESTAMP, '
-        'job TEXT, '
-        'attempts INTEGER, '
-        'data JSONB, '
-    ')')
+    await connection.execute(f"""
+    CREATE TABLE IF NOT EXISTS {table} (
+        id UUID PRIMARY KEY,
+        created_at TIMESTAMP,
+        scheduled_at TIMESTAMP,
+        picked_at TIMESTAMP,
+        expired_at TIMESTAMP,
+        job TEXT,
+        attempts INTEGER,
+        data JSONB
+    )
+    """)
