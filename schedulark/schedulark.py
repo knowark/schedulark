@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import datetime, timezone, timedelta
 from typing import Type, Tuple, Dict, Callable
 from .task import Task, Job, cronable
@@ -11,6 +12,7 @@ class Schedulark:
         self.registry: Registry = {}
         self.queue = queue or MemoryQueue()
         self.worker = Worker(self.registry, self.queue)
+        self.logger = logging.getLogger(__name__)
         self.iterations = 0
         self.tick = 60
 
@@ -38,6 +40,7 @@ class Schedulark:
     async def time(self) -> None:
         self.iterations += 1
         while self.iterations:
+            self.logger.info(f'Scheduling iteration #{self.iterations}...')
             now = datetime.now(timezone.utc)
             target = (now.replace(microsecond=0)
                       + timedelta(seconds=self.tick))
