@@ -46,6 +46,19 @@ async def test_scheduler_defer():
     assert task.data == data
 
 
+async def test_scheduler_work():
+    class MockWorker:
+        async def start(self):
+            self.started = True
+
+    scheduler = Schedulark()
+    scheduler.worker = MockWorker()
+
+    await scheduler.work()
+
+    assert scheduler.worker.started is True
+
+
 async def test_scheduler_schedule():
     class AlphaJob:
         async def __call__(self, task: Task) -> Dict:

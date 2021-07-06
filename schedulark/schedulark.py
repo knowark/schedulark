@@ -24,6 +24,9 @@ class Schedulark:
         task = Task(job=job, data=data)
         await self.queue.put(task)
 
+    async def work(self) -> None:
+        await self.worker.start()
+
     async def schedule(self) -> None:
         moment = datetime.now(timezone.utc)
         for job, (callback, frequency) in self.registry.items():
