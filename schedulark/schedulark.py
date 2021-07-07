@@ -26,9 +26,6 @@ class Schedulark:
         task = Task(job=job, data=data)
         await self.queue.put(task)
 
-    async def work(self) -> None:
-        await self.worker.start()
-
     async def schedule(self) -> None:
         moment = datetime.now(timezone.utc)
         for job, (callback, frequency) in self.registry.items():
@@ -36,6 +33,9 @@ class Schedulark:
                 continue
             task = Task(job=job)
             await self.queue.put(task)
+
+    async def work(self) -> None:
+        await self.worker.start()
 
     async def time(self) -> None:
         self.iterations += 1
@@ -45,8 +45,8 @@ class Schedulark:
             target = (now.replace(microsecond=0)
                       + timedelta(seconds=self.tick))
             delay = (target - now).total_seconds()
-            await asyncio.sleep(delay)
             await self.schedule()
+            await asyncio.sleep(delay)
             self.iterations += 1
 
     async def setup(self) -> None:

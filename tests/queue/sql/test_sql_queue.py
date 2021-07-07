@@ -1,3 +1,4 @@
+import datetime
 from typing import List, Dict, Tuple, Mapping, Any
 from json import dumps
 from inspect import cleandoc
@@ -101,11 +102,11 @@ async def test_sql_queue_put(mock_connector):
         """)
 
     assert connection.fetch_args == (
-        UUID('b9d278d7-11f5-4817-ad12-69989a988457'),
-        1625160082,
-        1625160082,
+        'b9d278d7-11f5-4817-ad12-69989a988457',
+        datetime.datetime(2021, 7, 1, 17, 21, 22),
+        datetime.datetime(2021, 7, 1, 17, 21, 22),
         None,
-        1625163682,
+        datetime.datetime(2021, 7, 1, 18, 21, 22),
         'WebsiteCompilationJob',
         0,
         dumps({
@@ -116,6 +117,40 @@ async def test_sql_queue_put(mock_connector):
 
 
 async def test_sql_queue_pick(mock_connector):
+    queue = SqlQueue(mock_connector)
+    connection = queue.connector.connection
+    connection.fetch_result = [dict(
+        id='b9d278d7-11f5-4817-ad12-69989a988457',
+        created_at=datetime.datetime(2021, 7, 1, 17, 21, 22),
+        scheduled_at=datetime.datetime(2021, 7, 1, 17, 21, 22),
+        picked_at=None,
+        expired_at=datetime.datetime(2021, 7, 1, 18, 21, 22),
+        job='WebsiteCompilationJob',
+        attempts=0,
+        data={
+            'tenant': 'knowark',
+            'tid': '7da5b9fc-7ca0-4156-8443-aa5caef5db1d'
+        }
+    )]
+
+    result = await queue.pick()
+
+    assert vars(result) == dict(
+        id='b9d278d7-11f5-4817-ad12-69989a988457',
+        created_at=1625160082,
+        scheduled_at=1625160082,
+        picked_at=None,
+        expired_at=1625163682,
+        job='WebsiteCompilationJob',
+        attempts=0,
+        data={
+            'tenant': 'knowark',
+            'tid': '7da5b9fc-7ca0-4156-8443-aa5caef5db1d'
+        }
+    )
+
+
+async def test_sql_queue_pick_empty(mock_connector):
     queue = SqlQueue(mock_connector)
     connection = queue.connector.connection
 
@@ -135,6 +170,7 @@ async def test_sql_queue_pick(mock_connector):
         )
         RETURNING *
         """)
+
 
 
 async def test_sql_queue_remove(mock_connector):

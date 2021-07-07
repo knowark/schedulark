@@ -4,7 +4,7 @@ from time import time
 
 class Task:
     def __init__(self, **attributes) -> None:
-        self.id = attributes.get('id', uuid4())
+        self.id = str(attributes.get('id', uuid4()))
         self.created_at = attributes.get('created_at', int(time()))
         self.scheduled_at = attributes.get('scheduled_at', self.created_at)
         self.picked_at = attributes.get('picked_at', 0)

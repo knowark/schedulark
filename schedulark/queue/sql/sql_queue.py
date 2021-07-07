@@ -3,6 +3,7 @@ import asyncio
 import threading
 from json import dumps
 from uuid import UUID
+from datetime import datetime
 from typing import Mapping, Dict, Optional
 from ...task import Task
 from ..queue import Queue
@@ -40,8 +41,12 @@ class SqlQueue(Queue):
 
         connection = await self.connector.get()
         parameters = [
-            UUID(task.id), task.created_at, task.scheduled_at,
-            task.picked_at or None, task.expired_at or None,
+            task.id, datetime.fromtimestamp(task.created_at),
+            datetime.fromtimestamp(task.scheduled_at),
+            task.picked_at and datetime.fromtimestamp(
+                task.picked_at) or None,
+            task.expired_at and datetime.fromtimestamp(
+                task.expired_at) or None,
             task.job, task.attempts, dumps(task.data)]
 
         await connection.fetch(query, *parameters)
@@ -63,8 +68,21 @@ class SqlQueue(Queue):
         connection = await self.connector.get()
 
         result = await connection.fetch(query)
+        if not result:
+            return None
 
-        return result and Task(**result[0]) or None
+        record = dict(result[0])
+        record['id'] = str(record['id'])
+        record['created_at'] = int(datetime.timestamp(
+            record['created_at']))
+        record['scheduled_at'] = int(datetime.timestamp(
+            record['scheduled_at']))
+        record['picked_at'] = record['picked_at'] and int(
+            datetime.timestamp(record['picked_at'])) or None
+        record['expired_at'] = record['expired_at'] and int(
+            datetime.timestamp(record['expired_at'])) or None
+
+        return Task(**record)
 
     async def remove(self, task: Task) -> None:
         query = f"""
