@@ -21,12 +21,12 @@ class BetaJob:
 @fixture
 def registry():
     return {
-        'AlphaJob': (AlphaJob(), ''),
-        'BetaJob': (BetaJob(), '')
+        'AlphaJob': AlphaJob(),
+        'BetaJob': BetaJob()
     }
 
 
-@fixture
+@ fixture
 def queue():
     queue = MemoryQueue()
     queue.content = {
@@ -55,7 +55,7 @@ async def test_worker_start(registry, queue):
             executed_tasks.append(task)
             return {}
 
-    registry['AlphaJob'] = (AlphaJob(), '')
+    registry['AlphaJob'] = AlphaJob()
 
     worker = Worker(registry, queue)
     worker.iterations = -5

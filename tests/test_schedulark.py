@@ -26,8 +26,8 @@ def test_scheduler_register():
     scheduler.register(AlphaJob())
     scheduler.register(BetaJob())
 
-    assert scheduler.registry['AlphaJob'][0].__class__ == AlphaJob
-    assert scheduler.registry['BetaJob'][0].__class__ == BetaJob
+    assert scheduler.registry['AlphaJob'].__class__ == AlphaJob
+    assert scheduler.registry['BetaJob'].__class__ == BetaJob
 
 
 async def test_scheduler_defer():
@@ -60,6 +60,8 @@ async def test_scheduler_work():
 
 async def test_scheduler_schedule():
     class AlphaJob:
+        frequency = ''
+
         async def __call__(self, task: Task) -> Dict:
             return {}
 
@@ -69,8 +71,7 @@ async def test_scheduler_schedule():
 
     scheduler = Schedulark()
 
-    frequency = '* * * * *'
-    scheduler.register(AlphaJob(), frequency)
+    scheduler.register(AlphaJob())
     scheduler.register(BetaJob())
 
     assert len(scheduler.queue.content) == 0
@@ -79,7 +80,7 @@ async def test_scheduler_schedule():
 
     assert len(scheduler.queue.content) == 1
     task = next(iter(scheduler.queue.content.values()))
-    assert task.job == 'AlphaJob'
+    assert task.job == 'BetaJob'
 
 
 async def test_scheduler_time():
@@ -91,8 +92,10 @@ async def test_scheduler_time():
 
     scheduler = Schedulark()
 
-    frequency = '* * * * *'
-    scheduler.register(alpha_job, frequency)
+    alpha_job.frequency = '* * * * *'
+    beta_job.frequency = ''
+
+    scheduler.register(alpha_job)
     scheduler.register(beta_job)
     scheduler.iterations = -3
     scheduler.tick = 0.01

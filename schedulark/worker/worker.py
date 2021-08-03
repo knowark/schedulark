@@ -4,7 +4,7 @@ from ..task import Job
 from ..queue import Queue
 
 
-Registry = Dict[str, Tuple[Callable, str]]
+Registry = Dict[str, Job]
 
 
 class Worker:
@@ -29,7 +29,7 @@ class Worker:
         if not task:
             return await asyncio.sleep(self.sleep)
 
-        job, _ = self.registry[task.job]
+        job = self.registry[task.job]
         timeout = (task.expired_at - task.scheduled_at)
         await asyncio.wait_for(job(task), timeout=timeout)
         await self.queue.remove(task)

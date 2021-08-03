@@ -1,5 +1,7 @@
+import time
 import asyncio
 import logging
+import inspect
 from datetime import datetime, timezone, timedelta
 from typing import Type, Tuple, Dict, Callable
 from .task import Task, Job, cronable
@@ -16,22 +18,30 @@ class Schedulark:
         self.iterations = 0
         self.tick = 60
 
-    def register(
-        self, job: Callable, frequency: str = '', name: str = ''
-    ) -> None:
-        name = name or getattr(job, '__name__', job.__class__.__name__)
-        self.registry[name] = (job, frequency)
+    def register(self, job: Job) -> None:
+        name = getattr(job, 'name', getattr(
+            job, '__name__', job.__class__.__name__))
+        self.registry[name] = job
 
-    async def defer(self, job: str, data: Dict = None) -> None:
-        task = Task(job=job, data=data)
+    async def defer(self, job: str, data: Dict = None,
+                    delay: int = 0, timeout: int = 600) -> None:
+        scheduled_at = int(time.time()) + delay
+        expired_at = scheduled_at + timeout
+        task = Task(job=job, scheduled_at=scheduled_at,
+                    expired_at=expired_at, data=data)
         await self.queue.put(task)
 
     async def schedule(self) -> None:
         moment = datetime.now(timezone.utc)
-        for job, (callback, frequency) in self.registry.items():
+        for name, job in self.registry.items():
+            frequency = getattr(job, 'frequency', '* * * * *')
             if not cronable(frequency, moment):
                 continue
-            task = Task(job=job)
+
+            data = getattr(job, 'data', None)
+            timeout = getattr(job, 'timeout', 600)
+            expired_at = int(datetime.timestamp(moment) + timeout)
+            task = Task(job=name, expired_at=expired_at, data=data)
             await self.queue.put(task)
 
     async def work(self) -> None:
