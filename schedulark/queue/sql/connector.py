@@ -8,7 +8,7 @@ class Connection(Protocol):
     async def fetch(self, query: str, *args, **kwargs) -> List[Mapping]:
         """Fetch the given query records"""
 
-    def transaction(self) ->  AsyncContextManager:
+    def transaction(self) -> AsyncContextManager:
         """Start a connection transaction"""
 
 
