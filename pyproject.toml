@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "schedulark"
-version = "0.1.1"
+version = "0.1.2"
 description = "Job Scheduling Library"
 authors = ["Knowark"]
 license = "MIT"
