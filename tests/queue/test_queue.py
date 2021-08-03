@@ -7,5 +7,3 @@ def test_queue_methods():
     assert 'put' in methods
     assert 'pick' in methods
     assert 'remove' in methods
-    assert 'size' in methods
-    assert 'clear' in methods

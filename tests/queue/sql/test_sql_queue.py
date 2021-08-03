@@ -203,35 +203,6 @@ async def test_sql_queue_remove(mock_connector):
     )
 
 
-async def test_sql_queue_size(mock_connector):
-    queue = SqlQueue(mock_connector)
-    connection = queue.connector.connection
-    task = Task(
-        id='b9d278d7-11f5-4817-ad12-69989a988457'
-    )
-
-    result = await queue.size()
-
-    assert result is 0
-    assert cleandoc(connection.fetch_query) == cleandoc(
-        """
-        SELECT COUNT(*) as count
-        FROM public.__tasks__
-        """)
-
-
-async def test_sql_queue_clear(mock_connector):
-    queue = SqlQueue(mock_connector)
-    connection = queue.connector.connection
-
-    result = await queue.clear()
-
-    assert cleandoc(connection.fetch_query) == cleandoc(
-        """
-        DELETE FROM public.__tasks__
-        """)
-
-
 async def test_sql_queue_setup(mock_connector):
     queue = SqlQueue(mock_connector)
 

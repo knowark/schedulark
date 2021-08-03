@@ -26,9 +26,3 @@ class MemoryQueue(Queue):
     async def remove(self, task: Task) -> None:
         if task.id in self.content:
             del self.content[task.id]
-
-    async def size(self) -> int:
-        return len(self.content)
-
-    async def clear(self) -> None:
-        self.content.clear()

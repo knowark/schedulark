@@ -42,7 +42,6 @@ async def test_scheduler_defer():
     await scheduler.defer('AlphaJob', data)
 
     task = await queue.pick()
-    assert await queue.size() == 1
     assert task.data == data
 
 

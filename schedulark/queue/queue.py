@@ -19,11 +19,3 @@ class Queue(ABC):
     @abstractmethod
     async def remove(self, task: Task) -> None:
         """Remove method to be implemented"""
-
-    @abstractmethod
-    async def size(self) -> int:
-        """Size method to be implemented"""
-
-    @abstractmethod
-    async def clear(self) -> None:
-        """Clear method to be implemented"""

@@ -95,25 +95,3 @@ class SqlQueue(Queue):
         parameters = [UUID(task.id)]
 
         await connection.fetch(query, *parameters)
-
-    async def size(self) -> int:
-        query = f"""
-        SELECT COUNT(*) as count
-        FROM public.__tasks__
-        """
-
-        connection = await self.connector.get()
-
-        result = await connection.fetch(query)
-        record: Mapping[str, int] = next(iter(result), {})
-
-        return record.get('count', 0)
-
-    async def clear(self) -> None:
-        query = f"""
-        DELETE FROM public.__tasks__
-        """
-
-        connection = await self.connector.get()
-
-        await connection.fetch(query)

@@ -61,27 +61,3 @@ async def test_memory_queue_remove():
     await queue.remove(task_1)
 
     assert queue.content == {}
-
-
-async def test_memory_queue_size():
-    queue = MemoryQueue()
-    queue.content = {
-        'T001': Task(id='T001'),
-        'T002': Task(id='T002'),
-        'T003': Task(id='T003')
-    }
-
-    assert await queue.size() == 3
-
-
-async def test_memory_queue_clear():
-    queue = MemoryQueue()
-    queue.content = {
-        'T001': Task(id='T001'),
-        'T002': Task(id='T002'),
-        'T003': Task(id='T003')
-    }
-
-    await queue.clear()
-
-    assert queue.content == {}
