@@ -5,7 +5,7 @@ from .task import Task, Job
 from .queue import Queue, MemoryQueue, SqlQueue
 
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
