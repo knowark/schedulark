@@ -15,7 +15,8 @@ def test_task_instantiation():
     assert task.created_at > 0
     assert task.scheduled_at > 0
     assert task.picked_at == 0
-    assert task.expired_at == 0
+    assert task.expired_at == (
+        task.scheduled_at + 600)
     assert task.attempts == 0
     assert task.data == {}
 

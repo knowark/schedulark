@@ -3,7 +3,7 @@ import asyncio
 import threading
 from json import dumps
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Mapping, Dict, Optional
 from ...task import Task
 from ..queue import Queue
@@ -13,7 +13,7 @@ from .migrations import (
 
 
 class SqlQueue(Queue):
-    def __init__(self, connector: Connector) -> None:
+    def __init__(self, connector: Connector, timeout: int = None) -> None:
         self.connector = connector
         self.table = TASKS_TABLE
         self.schema = TASKS_SCHEMA
@@ -22,7 +22,7 @@ class SqlQueue(Queue):
         await migrate(self.connector)
 
     async def put(self, task: Task) -> None:
-        query = f"""
+        query = """
         INSERT INTO public.__tasks__ (
             id, created_at, scheduled_at, picked_at, expired_at,
             job, attempts, data
@@ -41,12 +41,11 @@ class SqlQueue(Queue):
 
         connection = await self.connector.get()
         parameters = [
-            task.id, datetime.fromtimestamp(task.created_at),
-            datetime.fromtimestamp(task.scheduled_at),
-            task.picked_at and datetime.fromtimestamp(
-                task.picked_at) or None,
-            task.expired_at and datetime.fromtimestamp(
-                task.expired_at) or None,
+            task.id, datetime.fromtimestamp(task.created_at, timezone.utc),
+            datetime.fromtimestamp(task.scheduled_at, timezone.utc),
+            datetime.fromtimestamp(
+                task.picked_at, timezone.utc),
+            datetime.fromtimestamp(task.expired_at, timezone.utc),
             task.job, task.attempts, dumps(task.data)]
 
         await connection.fetch(query, *parameters)
@@ -57,7 +56,8 @@ class SqlQueue(Queue):
         SET picked_at = NOW()::timestamp
         WHERE id = (
             SELECT id FROM public.__tasks__
-            WHERE picked_at IS NULL
+            WHERE picked_at = 0
+            OR expired_at <= NOW()::timestamp
             ORDER BY scheduled_at
             FOR UPDATE SKIP LOCKED
             LIMIT 1
@@ -77,10 +77,10 @@ class SqlQueue(Queue):
             record['created_at']))
         record['scheduled_at'] = int(datetime.timestamp(
             record['scheduled_at']))
-        record['picked_at'] = record['picked_at'] and int(
-            datetime.timestamp(record['picked_at'])) or None
-        record['expired_at'] = record['expired_at'] and int(
-            datetime.timestamp(record['expired_at'])) or None
+        record['picked_at'] = int(datetime.timestamp(
+            record['picked_at']))
+        record['expired_at'] = int(datetime.timestamp(
+            record['expired_at']))
 
         return Task(**record)
 

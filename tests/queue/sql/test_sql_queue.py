@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone
 from typing import List, Dict, Tuple, Mapping, Any
 from json import dumps
 from inspect import cleandoc
@@ -103,10 +104,14 @@ async def test_sql_queue_put(mock_connector):
 
     assert connection.fetch_args == (
         'b9d278d7-11f5-4817-ad12-69989a988457',
-        datetime.datetime(2021, 7, 1, 17, 21, 22),
-        datetime.datetime(2021, 7, 1, 17, 21, 22),
-        None,
-        datetime.datetime(2021, 7, 1, 18, 21, 22),
+        datetime.datetime(
+            2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
+        datetime.datetime(
+            2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
+        datetime.datetime(
+            1970, 1, 1, 0, 0, tzinfo=timezone.utc),
+        datetime.datetime(
+            2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
         'WebsiteCompilationJob',
         0,
         dumps({
@@ -121,10 +126,14 @@ async def test_sql_queue_pick(mock_connector):
     connection = queue.connector.connection
     connection.fetch_result = [dict(
         id='b9d278d7-11f5-4817-ad12-69989a988457',
-        created_at=datetime.datetime(2021, 7, 1, 17, 21, 22),
-        scheduled_at=datetime.datetime(2021, 7, 1, 17, 21, 22),
-        picked_at=None,
-        expired_at=datetime.datetime(2021, 7, 1, 18, 21, 22),
+        created_at=datetime.datetime(
+            2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
+        scheduled_at=datetime.datetime(
+            2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
+        picked_at=datetime.datetime(
+            1970, 1, 1, 0, 0, tzinfo=timezone.utc),
+        expired_at=datetime.datetime(
+            2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
         job='WebsiteCompilationJob',
         attempts=0,
         data={
@@ -139,7 +148,7 @@ async def test_sql_queue_pick(mock_connector):
         id='b9d278d7-11f5-4817-ad12-69989a988457',
         created_at=1625160082,
         scheduled_at=1625160082,
-        picked_at=None,
+        picked_at=0,
         expired_at=1625163682,
         job='WebsiteCompilationJob',
         attempts=0,
@@ -163,14 +172,14 @@ async def test_sql_queue_pick_empty(mock_connector):
         SET picked_at = NOW()::timestamp
         WHERE id = (
             SELECT id FROM public.__tasks__
-            WHERE picked_at IS NULL
+            WHERE picked_at = 0
+            OR expired_at <= NOW()::timestamp
             ORDER BY scheduled_at
             FOR UPDATE SKIP LOCKED
             LIMIT 1
         )
         RETURNING *
         """)
-
 
 
 async def test_sql_queue_remove(mock_connector):

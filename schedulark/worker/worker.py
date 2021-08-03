@@ -30,6 +30,7 @@ class Worker:
             return await asyncio.sleep(self.sleep)
 
         job, _ = self.registry[task.job]
-        await job(task)
+        timeout = (task.expired_at - task.scheduled_at)
+        await asyncio.wait_for(job(task), timeout=timeout)
         await self.queue.remove(task)
         await asyncio.sleep(self.rest)
