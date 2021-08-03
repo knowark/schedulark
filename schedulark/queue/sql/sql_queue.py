@@ -41,11 +41,10 @@ class SqlQueue(Queue):
 
         connection = await self.connector.get()
         parameters = [
-            task.id, datetime.fromtimestamp(task.created_at, timezone.utc),
-            datetime.fromtimestamp(task.scheduled_at, timezone.utc),
-            datetime.fromtimestamp(
-                task.picked_at, timezone.utc),
-            datetime.fromtimestamp(task.expired_at, timezone.utc),
+            task.id, datetime.utcfromtimestamp(task.created_at),
+            datetime.utcfromtimestamp(task.scheduled_at),
+            datetime.utcfromtimestamp(task.picked_at),
+            datetime.utcfromtimestamp(task.expired_at),
             task.job, task.attempts, dumps(task.data)]
 
         await connection.fetch(query, *parameters)

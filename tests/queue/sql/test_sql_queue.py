@@ -104,14 +104,10 @@ async def test_sql_queue_put(mock_connector):
 
     assert connection.fetch_args == (
         'b9d278d7-11f5-4817-ad12-69989a988457',
-        datetime.datetime(
-            2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
-        datetime.datetime(
-            2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
-        datetime.datetime(
-            1970, 1, 1, 0, 0, tzinfo=timezone.utc),
-        datetime.datetime(
-            2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
+        datetime.datetime(2021, 7, 1, 17, 21, 22),
+        datetime.datetime(2021, 7, 1, 17, 21, 22),
+        datetime.datetime(1970, 1, 1, 0, 0),
+        datetime.datetime(2021, 7, 1, 18, 21, 22),
         'WebsiteCompilationJob',
         0,
         dumps({
