@@ -12,6 +12,7 @@ def test_task_instantiation():
 
     assert task.id is not None
     assert task.job == ''
+    assert task.status == ''
     assert task.created_at > 0
     assert task.scheduled_at > 0
     assert task.picked_at == 0

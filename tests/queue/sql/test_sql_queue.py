@@ -90,25 +90,27 @@ async def test_sql_queue_put(mock_connector):
             id, created_at, scheduled_at, picked_at, expired_at,
             job, attempts, data
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8
+            $1, $2, $3, $4, $5, $6, $7, $8, $9
         ) ON CONFLICT (id) DO UPDATE SET (
             created_at, scheduled_at, picked_at, expired_at,
             job, attempts, data
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
             EXCLUDED.picked_at, EXCLUDED.expired_at,
-            EXCLUDED.job, EXCLUDED.attempts, EXCLUDED.data
+            EXCLUDED.job, EXCLUDED.status, EXCLUDED.attempts,
+            EXCLUDED.data
         )
         RETURNING *
         """)
 
     assert connection.fetch_args == (
         'b9d278d7-11f5-4817-ad12-69989a988457',
-        datetime.datetime(2021, 7, 1, 17, 21, 22),
-        datetime.datetime(2021, 7, 1, 17, 21, 22),
-        datetime.datetime(1970, 1, 1, 0, 0),
-        datetime.datetime(2021, 7, 1, 18, 21, 22),
+        datetime.datetime(2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
+        datetime.datetime(2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
+        datetime.datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc),
+        datetime.datetime(2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
         'WebsiteCompilationJob',
+        '',
         0,
         dumps({
             'tenant': 'knowark',
@@ -131,6 +133,7 @@ async def test_sql_queue_pick(mock_connector):
         expired_at=datetime.datetime(
             2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
         job='WebsiteCompilationJob',
+        status='',
         attempts=0,
         data={
             'tenant': 'knowark',
@@ -147,6 +150,7 @@ async def test_sql_queue_pick(mock_connector):
         picked_at=0,
         expired_at=1625163682,
         job='WebsiteCompilationJob',
+        status='',
         attempts=0,
         data={
             'tenant': 'knowark',

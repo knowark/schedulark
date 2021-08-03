@@ -49,11 +49,12 @@ async def migration_001(connection: Connection):
     await connection.execute(f"""
     CREATE TABLE IF NOT EXISTS {table} (
         id UUID PRIMARY KEY,
-        created_at TIMESTAMP,
-        scheduled_at TIMESTAMP,
-        picked_at TIMESTAMP,
-        expired_at TIMESTAMP,
+        created_at TIMESTAMPTZ,
+        scheduled_at TIMESTAMPTZ,
+        picked_at TIMESTAMPTZ,
+        expired_at TIMESTAMPTZ,
         job TEXT,
+        status TEXT,
         attempts INTEGER,
         data JSONB)
     """)

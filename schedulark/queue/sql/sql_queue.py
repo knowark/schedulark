@@ -27,25 +27,26 @@ class SqlQueue(Queue):
             id, created_at, scheduled_at, picked_at, expired_at,
             job, attempts, data
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8
+            $1, $2, $3, $4, $5, $6, $7, $8, $9
         ) ON CONFLICT (id) DO UPDATE SET (
             created_at, scheduled_at, picked_at, expired_at,
             job, attempts, data
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
             EXCLUDED.picked_at, EXCLUDED.expired_at,
-            EXCLUDED.job, EXCLUDED.attempts, EXCLUDED.data
+            EXCLUDED.job, EXCLUDED.status, EXCLUDED.attempts,
+            EXCLUDED.data
         )
         RETURNING *
         """
 
         connection = await self.connector.get()
         parameters = [
-            task.id, datetime.utcfromtimestamp(task.created_at),
-            datetime.utcfromtimestamp(task.scheduled_at),
-            datetime.utcfromtimestamp(task.picked_at),
-            datetime.utcfromtimestamp(task.expired_at),
-            task.job, task.attempts, dumps(task.data)]
+            task.id, datetime.fromtimestamp(task.created_at, timezone.utc),
+            datetime.fromtimestamp(task.scheduled_at, timezone.utc),
+            datetime.fromtimestamp(task.picked_at, timezone.utc),
+            datetime.fromtimestamp(task.expired_at, timezone.utc),
+            task.job, task.status, task.attempts, dumps(task.data)]
 
         await connection.fetch(query, *parameters)
 
