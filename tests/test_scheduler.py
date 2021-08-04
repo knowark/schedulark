@@ -1,13 +1,13 @@
 from pytest import mark
 from typing import Dict
-from schedulark import Schedulark, Job, Task
+from schedulark import Scheduler, Job, Task
 
 
 pytestmark = mark.asyncio
 
 
 def test_scheduler_instantiation():
-    scheduler = Schedulark()
+    scheduler = Scheduler()
 
     assert scheduler is not None
 
@@ -21,7 +21,7 @@ def test_scheduler_register():
         async def __call__(self, task: Task) -> Dict:
             return {}
 
-    scheduler = Schedulark()
+    scheduler = Scheduler()
 
     scheduler.register(AlphaJob())
     scheduler.register(BetaJob())
@@ -30,27 +30,12 @@ def test_scheduler_register():
     assert scheduler.registry['BetaJob'].__class__ == BetaJob
 
 
-async def test_scheduler_defer():
-    class AlphaJob(Job):
-        pass
-
-    scheduler = Schedulark()
-    scheduler.registry['AlphaJob'] = AlphaJob()
-    queue = scheduler.queue
-
-    data = {'hello': 'world'}
-    await scheduler.defer('AlphaJob', data)
-
-    task = await queue.pick()
-    assert task.data == data
-
-
 async def test_scheduler_work():
     class MockWorker:
         async def start(self):
             self.started = True
 
-    scheduler = Schedulark()
+    scheduler = Scheduler()
     scheduler.worker = MockWorker()
 
     await scheduler.work()
@@ -69,7 +54,7 @@ async def test_scheduler_schedule():
         async def __call__(self, task: Task) -> Dict:
             return {}
 
-    scheduler = Schedulark()
+    scheduler = Scheduler()
 
     scheduler.register(AlphaJob())
     scheduler.register(BetaJob())
@@ -90,7 +75,7 @@ async def test_scheduler_time():
     async def beta_job(task: Task) -> Dict:
         return {}
 
-    scheduler = Schedulark()
+    scheduler = Scheduler()
 
     alpha_job.frequency = '* * * * *'
     beta_job.frequency = ''
@@ -111,6 +96,6 @@ async def test_scheduler_time():
 
 
 async def test_scheduler_setup():
-    scheduler = Schedulark()
+    scheduler = Scheduler()
     await scheduler.setup()
     assert scheduler is not None

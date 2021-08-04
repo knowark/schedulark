@@ -13,7 +13,7 @@ from .migrations import (
 
 
 class SqlQueue(Queue):
-    def __init__(self, connector: Connector, timeout: int = None) -> None:
+    def __init__(self, connector: Connector) -> None:
         self.connector = connector
         self.table = TASKS_TABLE
         self.schema = TASKS_SCHEMA
@@ -25,12 +25,12 @@ class SqlQueue(Queue):
         query = """
         INSERT INTO public.__tasks__ (
             id, created_at, scheduled_at, picked_at, expired_at,
-            job, attempts, data
+            job, status, attempts, data
         ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9
         ) ON CONFLICT (id) DO UPDATE SET (
             created_at, scheduled_at, picked_at, expired_at,
-            job, attempts, data
+            job, status, attempts, data
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
             EXCLUDED.picked_at, EXCLUDED.expired_at,
@@ -53,11 +53,11 @@ class SqlQueue(Queue):
     async def pick(self) -> Optional[Task]:
         query = f"""
         UPDATE public.__tasks__
-        SET picked_at = NOW()::timestamp
+        SET picked_at = NOW()::timestamptz
         WHERE id = (
             SELECT id FROM public.__tasks__
-            WHERE picked_at = 0
-            OR expired_at <= NOW()::timestamp
+            WHERE picked_at = 'epoch'
+            OR expired_at <= NOW()::timestamptz
             ORDER BY scheduled_at
             FOR UPDATE SKIP LOCKED
             LIMIT 1
@@ -66,8 +66,8 @@ class SqlQueue(Queue):
         """
 
         connection = await self.connector.get()
-
         result = await connection.fetch(query)
+
         if not result:
             return None
 
@@ -92,6 +92,6 @@ class SqlQueue(Queue):
 
         connection = await self.connector.get()
 
-        parameters = [UUID(task.id)]
+        parameters = [task.id]
 
         await connection.fetch(query, *parameters)

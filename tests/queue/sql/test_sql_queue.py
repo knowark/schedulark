@@ -88,12 +88,12 @@ async def test_sql_queue_put(mock_connector):
         """
         INSERT INTO public.__tasks__ (
             id, created_at, scheduled_at, picked_at, expired_at,
-            job, attempts, data
+            job, status, attempts, data
         ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9
         ) ON CONFLICT (id) DO UPDATE SET (
             created_at, scheduled_at, picked_at, expired_at,
-            job, attempts, data
+            job, status, attempts, data
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
             EXCLUDED.picked_at, EXCLUDED.expired_at,
@@ -169,11 +169,11 @@ async def test_sql_queue_pick_empty(mock_connector):
     assert cleandoc(connection.fetch_query) == cleandoc(
         """
         UPDATE public.__tasks__
-        SET picked_at = NOW()::timestamp
+        SET picked_at = NOW()::timestamptz
         WHERE id = (
             SELECT id FROM public.__tasks__
-            WHERE picked_at = 0
-            OR expired_at <= NOW()::timestamp
+            WHERE picked_at = 'epoch'
+            OR expired_at <= NOW()::timestamptz
             ORDER BY scheduled_at
             FOR UPDATE SKIP LOCKED
             LIMIT 1
@@ -199,7 +199,7 @@ async def test_sql_queue_remove(mock_connector):
         """)
 
     assert connection.fetch_args == (
-        UUID('b9d278d7-11f5-4817-ad12-69989a988457'),
+        'b9d278d7-11f5-4817-ad12-69989a988457',
     )
 
 
