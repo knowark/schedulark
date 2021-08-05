@@ -6,7 +6,7 @@ from inspect import cleandoc
 from uuid import UUID
 from contextlib import AsyncExitStack
 from pytest import mark, fixture
-from schedulark.task import Task
+from schedulark.base import Task
 from schedulark.queue import Queue, SqlQueue
 from schedulark.queue.sql.connector import Connector, Connection
 
@@ -73,7 +73,6 @@ async def test_sql_queue_put(mock_connector):
         created_at=1625160082,
         scheduled_at=1625160082,
         picked_at=0,
-        expired_at=1625163682,
         lane='build',
         job='WebsiteCompilationJob',
         attempts=0,
@@ -88,16 +87,16 @@ async def test_sql_queue_put(mock_connector):
     assert cleandoc(connection.fetch_query) == cleandoc(
         """
         INSERT INTO public.__tasks__ (
-            id, created_at, scheduled_at, picked_at, expired_at, failed_at,
-            lane, job, attempts, payload
+            id, created_at, scheduled_at, picked_at, failed_at,
+            timeout, lane, job, attempts, payload
         ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
         ) ON CONFLICT (id) DO UPDATE SET (
-            created_at, scheduled_at, picked_at, expired_at, failed_at,
-            lane, job, attempts, payload
+            created_at, scheduled_at, picked_at, failed_at,
+            timeout, lane, job, attempts, payload
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
-            EXCLUDED.picked_at, EXCLUDED.expired_at, EXCLUDED.failed_at,
+            EXCLUDED.picked_at, EXCLUDED.failed_at, EXCLUDED.timeout,
             EXCLUDED.lane, EXCLUDED.job, EXCLUDED.attempts,
             EXCLUDED.payload
         )
@@ -109,8 +108,8 @@ async def test_sql_queue_put(mock_connector):
         datetime.datetime(2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
         datetime.datetime(2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
         datetime.datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc),
-        datetime.datetime(2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
         datetime.datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc),
+        300,
         'build',
         'WebsiteCompilationJob',
         0,
@@ -132,10 +131,9 @@ async def test_sql_queue_pick(mock_connector):
             2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
         picked_at=datetime.datetime(
             1970, 1, 1, 0, 0, tzinfo=timezone.utc),
-        expired_at=datetime.datetime(
-            2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
         failed_at=datetime.datetime(
             1970, 1, 1, 0, 0, tzinfo=timezone.utc),
+        timeout=300,
         lane='build',
         job='WebsiteCompilationJob',
         attempts=0,
@@ -152,8 +150,8 @@ async def test_sql_queue_pick(mock_connector):
         created_at=1625160082,
         scheduled_at=1625160082,
         picked_at=0,
-        expired_at=1625163682,
         failed_at=0,
+        timeout=300,
         lane='build',
         job='WebsiteCompilationJob',
         attempts=0,
@@ -178,8 +176,7 @@ async def test_sql_queue_pick_empty(mock_connector):
         WHERE id = (
             SELECT id FROM public.__tasks__
             WHERE (picked_at = 'epoch'
-            OR expired_at <= NOW()::timestamptz)
-            AND scheduled_at >= NOW()::timestamptz
+            AND scheduled_at <= NOW()::timestamptz)
             ORDER BY scheduled_at
             FOR UPDATE SKIP LOCKED
             LIMIT 1

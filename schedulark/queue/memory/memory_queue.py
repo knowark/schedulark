@@ -1,12 +1,13 @@
 import time
 from typing import Dict, Optional
-from ...task import Task
+from ...base import Task
 from ..queue import Queue
 
 
 class MemoryQueue(Queue):
     def __init__(self) -> None:
         self.content: Dict[str, Task] = {}
+        self.time = time.time
 
     async def setup(self) -> None:
         self._setup = True
@@ -15,8 +16,9 @@ class MemoryQueue(Queue):
         self.content[task.id] = task
 
     async def pick(self) -> Optional[Task]:
+        now = self.time()
         tasks = [task for task in self.content.values()
-                 if not task.picked_at]
+                 if not task.picked_at and task.scheduled_at <= now]
 
         if not tasks:
             return None

@@ -1,7 +1,7 @@
 import time
 import logging
 from typing import Dict
-from .task import Task
+from .base import Task
 from .queue import Queue, MemoryQueue
 
 

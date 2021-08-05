@@ -1,5 +1,5 @@
 from pytest import mark
-from schedulark.task import Task
+from schedulark.base import Task
 from schedulark.queue import Queue, MemoryQueue
 
 
@@ -38,6 +38,7 @@ async def test_memory_queue_put():
 
 async def test_memory_queue_pick():
     queue = MemoryQueue()
+    queue.time = lambda: 1_625_075_900
     queue.content = {
         'T001': Task(id='T001', scheduled_at=1_625_075_800),
         'T002': Task(id='T002', scheduled_at=1_625_075_400),

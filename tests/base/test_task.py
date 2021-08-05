@@ -1,5 +1,5 @@
 from pytest import mark
-from schedulark.task import Task
+from schedulark.base import Task
 
 
 pytestmark = mark.asyncio
@@ -16,8 +16,7 @@ def test_task_instantiation():
     assert task.created_at > 0
     assert task.scheduled_at > 0
     assert task.picked_at == 0
-    assert task.expired_at == (
-        task.scheduled_at + 300)
+    assert task.timeout == 300
     assert task.failed_at == 0
     assert task.attempts == 0
     assert task.payload == {}

@@ -1,6 +1,6 @@
 from datetime import datetime
 from pytest import raises
-from schedulark.task import cronable
+from schedulark.base import cronable
 
 
 def test_cronable_every_minute():

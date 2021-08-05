@@ -2,7 +2,7 @@ import time
 import asyncio
 import logging
 from typing import Type, Tuple, Dict, Callable
-from ..task import Job
+from ..base import Job
 from ..queue import Queue
 
 
@@ -39,16 +39,13 @@ class Worker:
         job = self.registry[task.job]
         retries = getattr(job, 'retries', self.retries)
         backoff = getattr(job, 'backoff', self.backoff)
-        timeout = (task.expired_at - task.scheduled_at)
-
         try:
-            await asyncio.wait_for(job(task), timeout=timeout)
+            await asyncio.wait_for(job(task), timeout=task.timeout)
             await self.queue.remove(task)
         except Exception:
             self.logger.exception('{task.job}. Task processing failed.')
             task.scheduled_at += (backoff * (2 ** task.attempts))
             task.picked_at = 0
-            task.expired_at = task.scheduled_at + timeout
             task.failed_at = time.time()
             task.attempts += 1
 

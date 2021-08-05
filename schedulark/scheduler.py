@@ -4,7 +4,7 @@ import logging
 import inspect
 from datetime import datetime, timezone, timedelta
 from typing import Type, Tuple, Dict, Callable
-from .task import Task, Job, cronable
+from .base import Task, Job, cronable
 from .queue import Queue, MemoryQueue
 from .worker import Worker, Registry
 

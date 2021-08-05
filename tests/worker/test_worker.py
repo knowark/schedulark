@@ -1,7 +1,7 @@
 from typing import Dict
 from pytest import mark, fixture
 from schedulark.queue import MemoryQueue
-from schedulark.task import Task, Job
+from schedulark.base import Task, Job
 from schedulark.worker import Worker
 
 

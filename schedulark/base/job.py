@@ -1,5 +1,5 @@
 from typing import Dict, Protocol
-from ..task import Task
+from ..base import Task
 
 
 class Job(Protocol):

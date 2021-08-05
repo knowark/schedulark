@@ -9,9 +9,8 @@ class Task:
         self.scheduled_at = int(attributes.get(
             'scheduled_at', self.created_at))
         self.picked_at = int(attributes.get('picked_at', 0))
-        self.expired_at = int(attributes.get(
-            'expired_at', self.scheduled_at + 300))
         self.failed_at = int(attributes.get('failed_at', 0))
+        self.timeout = int(attributes.get('timeout', 300))
         self.lane = attributes.get('lane', '')
         self.job = attributes.get('job', '')
         self.attempts = attributes.get('attempts', 0)

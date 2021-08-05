@@ -1,6 +1,6 @@
 from typing import Optional
 from abc import ABC, abstractmethod
-from ..task import Task
+from ..base import Task
 
 
 class Queue(ABC):

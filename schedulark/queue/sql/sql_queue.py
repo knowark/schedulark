@@ -6,7 +6,7 @@ from json import dumps
 from uuid import UUID
 from datetime import datetime, timezone
 from typing import Mapping, Dict, Optional
-from ...task import Task
+from ...base import Task
 from ..queue import Queue
 from .connector import Connector
 from .migrations import (
@@ -25,16 +25,16 @@ class SqlQueue(Queue):
     async def put(self, task: Task) -> None:
         query = """
         INSERT INTO public.__tasks__ (
-            id, created_at, scheduled_at, picked_at, expired_at, failed_at,
-            lane, job, attempts, payload
+            id, created_at, scheduled_at, picked_at, failed_at,
+            timeout, lane, job, attempts, payload
         ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
         ) ON CONFLICT (id) DO UPDATE SET (
-            created_at, scheduled_at, picked_at, expired_at, failed_at,
-            lane, job, attempts, payload
+            created_at, scheduled_at, picked_at, failed_at,
+            timeout, lane, job, attempts, payload
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
-            EXCLUDED.picked_at, EXCLUDED.expired_at, EXCLUDED.failed_at,
+            EXCLUDED.picked_at, EXCLUDED.failed_at, EXCLUDED.timeout,
             EXCLUDED.lane, EXCLUDED.job, EXCLUDED.attempts,
             EXCLUDED.payload
         )
@@ -46,9 +46,8 @@ class SqlQueue(Queue):
             task.id, datetime.fromtimestamp(task.created_at, timezone.utc),
             datetime.fromtimestamp(task.scheduled_at, timezone.utc),
             datetime.fromtimestamp(task.picked_at, timezone.utc),
-            datetime.fromtimestamp(task.expired_at, timezone.utc),
             datetime.fromtimestamp(task.failed_at, timezone.utc),
-            task.lane, task.job, task.attempts,
+            task.timeout, task.lane, task.job, task.attempts,
             dumps(task.payload)]
 
         await connection.fetch(query, *parameters)
@@ -60,8 +59,7 @@ class SqlQueue(Queue):
         WHERE id = (
             SELECT id FROM public.__tasks__
             WHERE (picked_at = 'epoch'
-            OR expired_at <= NOW()::timestamptz)
-            AND scheduled_at >= NOW()::timestamptz
+            AND scheduled_at <= NOW()::timestamptz)
             ORDER BY scheduled_at
             FOR UPDATE SKIP LOCKED
             LIMIT 1
@@ -83,8 +81,6 @@ class SqlQueue(Queue):
             record['scheduled_at']))
         record['picked_at'] = int(datetime.timestamp(
             record['picked_at']))
-        record['expired_at'] = int(datetime.timestamp(
-            record['expired_at']))
         record['failed_at'] = int(datetime.timestamp(
             record['failed_at']))
         record['payload'] = json.loads(
