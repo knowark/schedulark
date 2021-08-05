@@ -10,7 +10,7 @@ class Task:
             'scheduled_at', self.created_at))
         self.picked_at = int(attributes.get('picked_at', 0))
         self.expired_at = int(attributes.get(
-            'expired_at', self.scheduled_at + 600))
+            'expired_at', self.scheduled_at + 300))
         self.category = attributes.get('category', '')
         self.job = attributes.get('job', '')
         self.status = attributes.get('status', '')

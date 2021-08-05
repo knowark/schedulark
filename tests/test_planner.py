@@ -25,8 +25,8 @@ async def test_planner_defer():
     planner = Planner()
     queue = planner.queue
 
-    data = {'hello': 'world'}
-    await planner.defer('AlphaJob', data)
+    payload = {'hello': 'world'}
+    await planner.defer('AlphaJob', payload)
 
     task = await queue.pick()
-    assert task.payload == data
+    assert task.payload == payload

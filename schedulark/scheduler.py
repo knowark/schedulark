@@ -48,8 +48,10 @@ class Scheduler:
             if not cronable(frequency, moment):
                 continue
 
-            data = getattr(job, 'data', None)
-            timeout = getattr(job, 'timeout', 600)
+            payload = getattr(job, 'payload', {})
+            category = getattr(job, 'category', '')
+            timeout = getattr(job, 'timeout', 300)
             expired_at = int(datetime.timestamp(moment) + timeout)
-            task = Task(job=name, expired_at=expired_at, data=data)
+            task = Task(job=name, category=category,
+                        expired_at=expired_at, payload=payload)
             await self.queue.put(task)

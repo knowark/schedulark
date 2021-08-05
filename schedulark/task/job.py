@@ -4,8 +4,10 @@ from ..task import Task
 
 class Job(Protocol):
     name: str = ''
-    timeout: int = 600
+    category: str = ''
+    timeout: int = 300
     frequency: str = '* * * * *'
+    payload: dict = {}
 
     async def __call__(self, task: Task) -> Dict:
         """Job callback to be executed."""

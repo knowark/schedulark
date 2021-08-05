@@ -18,7 +18,7 @@ def test_task_instantiation():
     assert task.scheduled_at > 0
     assert task.picked_at == 0
     assert task.expired_at == (
-        task.scheduled_at + 600)
+        task.scheduled_at + 300)
     assert task.attempts == 0
     assert task.payload == {}
 
@@ -26,8 +26,10 @@ def test_task_instantiation():
 def test_task_attributes():
     payload = {
         'meta': {
-            'tenant': 'knowark',
-            'tid': '3cc2be35-b440-46e9-b67f-b294df945f97'
+            'auth': {
+                'tenant': 'knowark',
+                'tid': '3cc2be35-b440-46e9-b67f-b294df945f97'
+            }
         },
         'data': {
             'records': [{'001': {'Hello': 'World'}}]

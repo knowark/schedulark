@@ -49,8 +49,9 @@ async def migration_001(connection: Connection):
         scheduled_at TIMESTAMPTZ,
         picked_at TIMESTAMPTZ,
         expired_at TIMESTAMPTZ,
+        category TEXT,
         job TEXT,
         status TEXT,
         attempts INTEGER,
-        data JSONB)
+        payload JSONB)
     """)
