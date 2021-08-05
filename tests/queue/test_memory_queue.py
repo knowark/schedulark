@@ -12,6 +12,14 @@ def test_memory_queue_instantiation():
     assert isinstance(queue, Queue)
 
 
+async def test_memory_queue_setup():
+    queue = MemoryQueue()
+
+    await queue.setup()
+
+    assert queue._setup is True
+
+
 async def test_memory_queue_put():
     queue = MemoryQueue()
 

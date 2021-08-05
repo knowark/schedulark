@@ -8,6 +8,9 @@ class MemoryQueue(Queue):
     def __init__(self) -> None:
         self.content: Dict[str, Task] = {}
 
+    async def setup(self) -> None:
+        self._setup = True
+
     async def put(self, task: Task) -> None:
         self.content[task.id] = task
 

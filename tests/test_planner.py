@@ -12,6 +12,12 @@ def test_planner_instantiation():
     assert planner is not None
 
 
+async def test_planner_setup():
+    planner = Planner()
+    await planner.setup()
+    assert planner.queue._setup is True
+
+
 async def test_planner_defer():
     class AlphaJob(Job):
         pass
@@ -23,4 +29,4 @@ async def test_planner_defer():
     await planner.defer('AlphaJob', data)
 
     task = await queue.pick()
-    assert task.data == data
+    assert task.payload == data

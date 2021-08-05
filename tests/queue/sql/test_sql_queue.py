@@ -24,7 +24,7 @@ def mock_connector():
             self.fetch_query = ''
             self.fetch_args: Tuple = ()
             self.fetch_result: List[Any] = []
-            self.data: Dict = {}
+            self.payload: Dict = {}
 
         async def execute(self, query: str, *args, **kwargs) -> str:
             self.execute_query = query
@@ -39,8 +39,8 @@ def mock_connector():
         def transaction(self):
             return AsyncExitStack()
 
-        def load(self, data) -> None:
-            self.data = data
+        def load(self, payload) -> None:
+            self.payload = payload
 
     class MockConnector:
         def __init__(self) -> None:
@@ -53,8 +53,8 @@ def mock_connector():
         async def put(self, connection: Connection, *args, **kwargs) -> None:
             self.pool.append(connection)
 
-        def load(self, data) -> None:
-            self.connection.load(data)
+        def load(self, payload) -> None:
+            self.connection.load(payload)
 
     return MockConnector()
 
@@ -74,9 +74,10 @@ async def test_sql_queue_put(mock_connector):
         scheduled_at=1625160082,
         picked_at=0,
         expired_at=1625163682,
+        category='build',
         job='WebsiteCompilationJob',
         attempts=0,
-        data={
+        payload={
             'tenant': 'knowark',
             'tid': '7da5b9fc-7ca0-4156-8443-aa5caef5db1d'
         }
@@ -88,17 +89,17 @@ async def test_sql_queue_put(mock_connector):
         """
         INSERT INTO public.__tasks__ (
             id, created_at, scheduled_at, picked_at, expired_at,
-            job, status, attempts, data
+            category, job, status, attempts, payload
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
         ) ON CONFLICT (id) DO UPDATE SET (
             created_at, scheduled_at, picked_at, expired_at,
-            job, status, attempts, data
+            category, job, status, attempts, payload
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
             EXCLUDED.picked_at, EXCLUDED.expired_at,
-            EXCLUDED.job, EXCLUDED.status, EXCLUDED.attempts,
-            EXCLUDED.data
+            EXCLUDED.category, EXCLUDED.job, EXCLUDED.status,
+            EXCLUDED.attempts, EXCLUDED.payload
         )
         RETURNING *
         """)
@@ -109,6 +110,7 @@ async def test_sql_queue_put(mock_connector):
         datetime.datetime(2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
         datetime.datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc),
         datetime.datetime(2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
+        'build',
         'WebsiteCompilationJob',
         '',
         0,
@@ -132,10 +134,11 @@ async def test_sql_queue_pick(mock_connector):
             1970, 1, 1, 0, 0, tzinfo=timezone.utc),
         expired_at=datetime.datetime(
             2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
+        category='build',
         job='WebsiteCompilationJob',
         status='',
         attempts=0,
-        data={
+        payload={
             'tenant': 'knowark',
             'tid': '7da5b9fc-7ca0-4156-8443-aa5caef5db1d'
         }
@@ -149,10 +152,11 @@ async def test_sql_queue_pick(mock_connector):
         scheduled_at=1625160082,
         picked_at=0,
         expired_at=1625163682,
+        category='build',
         job='WebsiteCompilationJob',
         status='',
         attempts=0,
-        data={
+        payload={
             'tenant': 'knowark',
             'tid': '7da5b9fc-7ca0-4156-8443-aa5caef5db1d'
         }

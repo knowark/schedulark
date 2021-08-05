@@ -98,4 +98,4 @@ async def test_scheduler_time():
 async def test_scheduler_setup():
     scheduler = Scheduler()
     await scheduler.setup()
-    assert scheduler is not None
+    assert scheduler.queue._setup is True

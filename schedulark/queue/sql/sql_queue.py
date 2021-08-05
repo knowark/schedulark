@@ -25,17 +25,17 @@ class SqlQueue(Queue):
         query = """
         INSERT INTO public.__tasks__ (
             id, created_at, scheduled_at, picked_at, expired_at,
-            job, status, attempts, data
+            category, job, status, attempts, payload
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
         ) ON CONFLICT (id) DO UPDATE SET (
             created_at, scheduled_at, picked_at, expired_at,
-            job, status, attempts, data
+            category, job, status, attempts, payload
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
             EXCLUDED.picked_at, EXCLUDED.expired_at,
-            EXCLUDED.job, EXCLUDED.status, EXCLUDED.attempts,
-            EXCLUDED.data
+            EXCLUDED.category, EXCLUDED.job, EXCLUDED.status,
+            EXCLUDED.attempts, EXCLUDED.payload
         )
         RETURNING *
         """
@@ -46,7 +46,8 @@ class SqlQueue(Queue):
             datetime.fromtimestamp(task.scheduled_at, timezone.utc),
             datetime.fromtimestamp(task.picked_at, timezone.utc),
             datetime.fromtimestamp(task.expired_at, timezone.utc),
-            task.job, task.status, task.attempts, dumps(task.data)]
+            task.category, task.job, task.status, task.attempts,
+            dumps(task.payload)]
 
         await connection.fetch(query, *parameters)
 
