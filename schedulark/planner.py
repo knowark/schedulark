@@ -14,11 +14,11 @@ class Planner:
     async def setup(self) -> None:
         await self.queue.setup()
 
-    async def defer(self, job: str, payload: Dict = None,
+    async def defer(self, job: str, payload: Dict = None, category: str = '',
                     delay: int = 0, timeout: int = 0) -> None:
         self.logger.info(f'Deferring job <{job}>...')
         scheduled_at = int(time.time()) + delay
         expired_at = scheduled_at + (timeout or self.timeout)
-        task = Task(job=job, scheduled_at=scheduled_at,
+        task = Task(job=job, category=category, scheduled_at=scheduled_at,
                     expired_at=expired_at, payload=payload)
         await self.queue.put(task)
