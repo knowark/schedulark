@@ -50,7 +50,7 @@ async def migration_001(connection: Connection):
         picked_at TIMESTAMPTZ,
         expired_at TIMESTAMPTZ,
         failed_at TIMESTAMPTZ,
-        category TEXT,
+        lane TEXT,
         job TEXT,
         attempts INTEGER,
         payload JSONB)

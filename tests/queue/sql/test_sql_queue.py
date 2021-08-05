@@ -74,7 +74,7 @@ async def test_sql_queue_put(mock_connector):
         scheduled_at=1625160082,
         picked_at=0,
         expired_at=1625163682,
-        category='build',
+        lane='build',
         job='WebsiteCompilationJob',
         attempts=0,
         payload={
@@ -89,16 +89,16 @@ async def test_sql_queue_put(mock_connector):
         """
         INSERT INTO public.__tasks__ (
             id, created_at, scheduled_at, picked_at, expired_at, failed_at,
-            category, job, attempts, payload
+            lane, job, attempts, payload
         ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
         ) ON CONFLICT (id) DO UPDATE SET (
             created_at, scheduled_at, picked_at, expired_at, failed_at,
-            category, job, attempts, payload
+            lane, job, attempts, payload
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
             EXCLUDED.picked_at, EXCLUDED.expired_at, EXCLUDED.failed_at,
-            EXCLUDED.category, EXCLUDED.job, EXCLUDED.attempts,
+            EXCLUDED.lane, EXCLUDED.job, EXCLUDED.attempts,
             EXCLUDED.payload
         )
         RETURNING *
@@ -136,7 +136,7 @@ async def test_sql_queue_pick(mock_connector):
             2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
         failed_at=datetime.datetime(
             1970, 1, 1, 0, 0, tzinfo=timezone.utc),
-        category='build',
+        lane='build',
         job='WebsiteCompilationJob',
         attempts=0,
         payload={
@@ -154,7 +154,7 @@ async def test_sql_queue_pick(mock_connector):
         picked_at=0,
         expired_at=1625163682,
         failed_at=0,
-        category='build',
+        lane='build',
         job='WebsiteCompilationJob',
         attempts=0,
         payload={

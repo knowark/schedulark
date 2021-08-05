@@ -4,7 +4,7 @@ from ..task import Task
 
 class Job(Protocol):
     name: str = ''
-    category: str = ''
+    lane: str = ''
     timeout: int = 300
     backoff: int = 3
     retries: int = 12

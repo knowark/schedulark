@@ -163,7 +163,7 @@ async def test_worker_all_processed(registry, queue):
     registry['BetaJob'] = FailingBetaJob(executed_tasks)
 
     worker = Worker(registry, queue)
-    worker.iterations = -8
+    worker.iterations = -9
     worker.sleep = 0.01
     worker.rest = 0.001
 

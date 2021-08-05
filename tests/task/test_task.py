@@ -12,7 +12,7 @@ def test_task_instantiation():
 
     assert task.id is not None
     assert task.job == ''
-    assert task.category == ''
+    assert task.lane == ''
     assert task.created_at > 0
     assert task.scheduled_at > 0
     assert task.picked_at == 0
@@ -40,7 +40,7 @@ def test_task_attributes():
         'id': 'J001',
         'created_at': 1624895016,
         'scheduled_at': 1624898669,
-        'category': 'event',
+        'lane': 'event',
         'payload': payload
     }
 

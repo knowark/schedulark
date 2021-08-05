@@ -49,9 +49,9 @@ class Scheduler:
                 continue
 
             payload = getattr(job, 'payload', {})
-            category = getattr(job, 'category', '')
+            lane = getattr(job, 'lane', '')
             timeout = getattr(job, 'timeout', 300)
             expired_at = int(datetime.timestamp(moment) + timeout)
-            task = Task(job=name, category=category,
+            task = Task(job=name, lane=lane,
                         expired_at=expired_at, payload=payload)
             await self.queue.put(task)

@@ -12,7 +12,7 @@ class Task:
         self.expired_at = int(attributes.get(
             'expired_at', self.scheduled_at + 300))
         self.failed_at = int(attributes.get('failed_at', 0))
-        self.category = attributes.get('category', '')
+        self.lane = attributes.get('lane', '')
         self.job = attributes.get('job', '')
         self.attempts = attributes.get('attempts', 0)
         self.payload = attributes.get('payload') or {}
