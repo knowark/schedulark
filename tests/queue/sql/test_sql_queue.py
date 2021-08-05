@@ -88,18 +88,18 @@ async def test_sql_queue_put(mock_connector):
     assert cleandoc(connection.fetch_query) == cleandoc(
         """
         INSERT INTO public.__tasks__ (
-            id, created_at, scheduled_at, picked_at, expired_at,
-            category, job, status, attempts, payload
+            id, created_at, scheduled_at, picked_at, expired_at, failed_at,
+            category, job, attempts, payload
         ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
         ) ON CONFLICT (id) DO UPDATE SET (
-            created_at, scheduled_at, picked_at, expired_at,
-            category, job, status, attempts, payload
+            created_at, scheduled_at, picked_at, expired_at, failed_at,
+            category, job, attempts, payload
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
-            EXCLUDED.picked_at, EXCLUDED.expired_at,
-            EXCLUDED.category, EXCLUDED.job, EXCLUDED.status,
-            EXCLUDED.attempts, EXCLUDED.payload
+            EXCLUDED.picked_at, EXCLUDED.expired_at, EXCLUDED.failed_at,
+            EXCLUDED.category, EXCLUDED.job, EXCLUDED.attempts,
+            EXCLUDED.payload
         )
         RETURNING *
         """)
@@ -110,9 +110,9 @@ async def test_sql_queue_put(mock_connector):
         datetime.datetime(2021, 7, 1, 17, 21, 22, tzinfo=timezone.utc),
         datetime.datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc),
         datetime.datetime(2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
+        datetime.datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc),
         'build',
         'WebsiteCompilationJob',
-        '',
         0,
         dumps({
             'tenant': 'knowark',
@@ -134,9 +134,10 @@ async def test_sql_queue_pick(mock_connector):
             1970, 1, 1, 0, 0, tzinfo=timezone.utc),
         expired_at=datetime.datetime(
             2021, 7, 1, 18, 21, 22, tzinfo=timezone.utc),
+        failed_at=datetime.datetime(
+            1970, 1, 1, 0, 0, tzinfo=timezone.utc),
         category='build',
         job='WebsiteCompilationJob',
-        status='',
         attempts=0,
         payload={
             'tenant': 'knowark',
@@ -152,9 +153,9 @@ async def test_sql_queue_pick(mock_connector):
         scheduled_at=1625160082,
         picked_at=0,
         expired_at=1625163682,
+        failed_at=0,
         category='build',
         job='WebsiteCompilationJob',
-        status='',
         attempts=0,
         payload={
             'tenant': 'knowark',

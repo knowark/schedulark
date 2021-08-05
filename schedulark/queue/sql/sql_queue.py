@@ -24,18 +24,18 @@ class SqlQueue(Queue):
     async def put(self, task: Task) -> None:
         query = """
         INSERT INTO public.__tasks__ (
-            id, created_at, scheduled_at, picked_at, expired_at,
-            category, job, status, attempts, payload
+            id, created_at, scheduled_at, picked_at, expired_at, failed_at,
+            category, job, attempts, payload
         ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
         ) ON CONFLICT (id) DO UPDATE SET (
-            created_at, scheduled_at, picked_at, expired_at,
-            category, job, status, attempts, payload
+            created_at, scheduled_at, picked_at, expired_at, failed_at,
+            category, job, attempts, payload
         ) = (
             EXCLUDED.created_at, EXCLUDED.scheduled_at,
-            EXCLUDED.picked_at, EXCLUDED.expired_at,
-            EXCLUDED.category, EXCLUDED.job, EXCLUDED.status,
-            EXCLUDED.attempts, EXCLUDED.payload
+            EXCLUDED.picked_at, EXCLUDED.expired_at, EXCLUDED.failed_at,
+            EXCLUDED.category, EXCLUDED.job, EXCLUDED.attempts,
+            EXCLUDED.payload
         )
         RETURNING *
         """
@@ -46,7 +46,8 @@ class SqlQueue(Queue):
             datetime.fromtimestamp(task.scheduled_at, timezone.utc),
             datetime.fromtimestamp(task.picked_at, timezone.utc),
             datetime.fromtimestamp(task.expired_at, timezone.utc),
-            task.category, task.job, task.status, task.attempts,
+            datetime.fromtimestamp(task.failed_at, timezone.utc),
+            task.category, task.job, task.attempts,
             dumps(task.payload)]
 
         await connection.fetch(query, *parameters)
@@ -82,6 +83,8 @@ class SqlQueue(Queue):
             record['picked_at']))
         record['expired_at'] = int(datetime.timestamp(
             record['expired_at']))
+        record['failed_at'] = int(datetime.timestamp(
+            record['failed_at']))
 
         return Task(**record)
 

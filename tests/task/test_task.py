@@ -12,13 +12,13 @@ def test_task_instantiation():
 
     assert task.id is not None
     assert task.job == ''
-    assert task.status == ''
     assert task.category == ''
     assert task.created_at > 0
     assert task.scheduled_at > 0
     assert task.picked_at == 0
     assert task.expired_at == (
         task.scheduled_at + 300)
+    assert task.failed_at == 0
     assert task.attempts == 0
     assert task.payload == {}
 
@@ -50,5 +50,6 @@ def test_task_attributes():
     assert task.created_at == attributes['created_at']
     assert task.scheduled_at == attributes['scheduled_at']
     assert task.picked_at == 0
+    assert task.failed_at == 0
     assert task.attempts == 0
     assert task.payload == payload

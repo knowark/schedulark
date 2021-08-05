@@ -11,8 +11,8 @@ class Task:
         self.picked_at = int(attributes.get('picked_at', 0))
         self.expired_at = int(attributes.get(
             'expired_at', self.scheduled_at + 300))
+        self.failed_at = int(attributes.get('failed_at', 0))
         self.category = attributes.get('category', '')
         self.job = attributes.get('job', '')
-        self.status = attributes.get('status', '')
         self.attempts = attributes.get('attempts', 0)
         self.payload = attributes.get('payload') or {}
