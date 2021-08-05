@@ -28,7 +28,6 @@ class FailingBetaJob:
     async def __call__(self, task: Task) -> Dict:
         self.executed_tasks.append(task)
         raise Exception('Something went wrong with the job!')
-        return {}
 
 
 @fixture
@@ -164,7 +163,7 @@ async def test_worker_all_processed(registry, queue):
     registry['BetaJob'] = FailingBetaJob(executed_tasks)
 
     worker = Worker(registry, queue)
-    worker.iterations = -9
+    worker.iterations = -8
     worker.sleep = 0.01
     worker.rest = 0.001
 
