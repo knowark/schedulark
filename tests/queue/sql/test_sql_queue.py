@@ -177,8 +177,9 @@ async def test_sql_queue_pick_empty(mock_connector):
         SET picked_at = NOW()::timestamptz
         WHERE id = (
             SELECT id FROM public.__tasks__
-            WHERE picked_at = 'epoch'
-            OR expired_at <= NOW()::timestamptz
+            WHERE (picked_at = 'epoch'
+            OR expired_at <= NOW()::timestamptz)
+            AND scheduled_at >= NOW()::timestamptz
             ORDER BY scheduled_at
             FOR UPDATE SKIP LOCKED
             LIMIT 1
