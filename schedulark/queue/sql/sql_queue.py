@@ -1,4 +1,5 @@
 import time
+import json
 import asyncio
 import threading
 from json import dumps
@@ -85,6 +86,8 @@ class SqlQueue(Queue):
             record['expired_at']))
         record['failed_at'] = int(datetime.timestamp(
             record['failed_at']))
+        record['payload'] = json.loads(
+            str(record['payload']))
 
         return Task(**record)
 

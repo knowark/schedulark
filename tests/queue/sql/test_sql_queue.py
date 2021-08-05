@@ -139,10 +139,10 @@ async def test_sql_queue_pick(mock_connector):
         lane='build',
         job='WebsiteCompilationJob',
         attempts=0,
-        payload={
-            'tenant': 'knowark',
-            'tid': '7da5b9fc-7ca0-4156-8443-aa5caef5db1d'
-        }
+        payload='''{
+            "tenant": "knowark",
+            "tid": "7da5b9fc-7ca0-4156-8443-aa5caef5db1d"
+        }'''
     )]
 
     result = await queue.pick()
