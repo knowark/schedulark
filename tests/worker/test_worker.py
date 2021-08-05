@@ -18,6 +18,19 @@ class BetaJob:
         return {}
 
 
+class FailingBetaJob:
+    name = 'BetaJob'
+    retries = 5
+
+    def __init__(self, executed_tasks):
+        self.executed_tasks = executed_tasks
+
+    async def __call__(self, task: Task) -> Dict:
+        self.executed_tasks.append(task)
+        raise Exception('Something went wrong with the job!')
+        return {}
+
+
 @fixture
 def registry():
     return {
@@ -26,7 +39,7 @@ def registry():
     }
 
 
-@ fixture
+@fixture
 def queue():
     queue = MemoryQueue()
     queue.content = {
@@ -78,3 +91,85 @@ async def test_worker_stop(registry, queue):
     worker.stop()
 
     assert worker.iterations == 0
+
+
+async def test_worker_retries_with_backoff(registry, queue):
+    executed_tasks = []
+
+    registry['BetaJob'] = FailingBetaJob(executed_tasks)
+
+    worker = Worker(registry, queue)
+    worker.iterations = -2
+    worker.sleep = 0.01
+    worker.rest = 0.001
+
+    assert len(worker.queue.content) == 3
+    assert worker.queue.content['T002'].attempts == 0
+    assert worker.queue.content['T002'].failed_at == 0
+    assert worker.queue.content['T002'].picked_at == 0
+    assert worker.queue.content['T002'].scheduled_at == 1_625_075_400
+
+    await worker.start()
+
+    assert len(executed_tasks) == 1
+    assert len(worker.queue.content) == 3
+    assert worker.queue.content['T002'].attempts == 1
+    assert worker.queue.content['T002'].failed_at > 0
+    assert worker.queue.content['T002'].picked_at == 0
+    assert worker.queue.content['T002'].scheduled_at == 1_625_075_403
+
+
+async def test_worker_retries_with_exponential_backoff(registry, queue):
+    executed_tasks = []
+
+    registry['BetaJob'] = FailingBetaJob(executed_tasks)
+
+    worker = Worker(registry, queue)
+    worker.iterations = -6
+    worker.sleep = 0.01
+    worker.rest = 0.001
+
+    await worker.start()
+
+    assert worker.iterations == 0
+    assert len(executed_tasks) == 5
+    assert len(worker.queue.content) == 3
+    assert worker.queue.content['T002'].attempts == 5
+    assert worker.queue.content['T002'].failed_at > 0
+    assert worker.queue.content['T002'].picked_at == 0
+    assert worker.queue.content['T002'].scheduled_at == 1_625_075_493
+
+
+async def test_worker_max_retries_reached(registry, queue):
+    executed_tasks = []
+
+    registry['BetaJob'] = FailingBetaJob(executed_tasks)
+
+    worker = Worker(registry, queue)
+    worker.iterations = -7
+    worker.sleep = 0.01
+    worker.rest = 0.001
+
+    await worker.start()
+
+    assert worker.iterations == 0
+    assert len(executed_tasks) == 6
+    assert len(worker.queue.content) == 2
+    assert 'T002' not in worker.queue.content
+
+
+async def test_worker_all_processed(registry, queue):
+    executed_tasks = []
+
+    registry['BetaJob'] = FailingBetaJob(executed_tasks)
+
+    worker = Worker(registry, queue)
+    worker.iterations = -9
+    worker.sleep = 0.01
+    worker.rest = 0.001
+
+    await worker.start()
+
+    assert worker.iterations == 0
+    assert len(executed_tasks) == 6
+    assert len(worker.queue.content) == 0
