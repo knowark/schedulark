@@ -18,7 +18,8 @@ class MemoryQueue(Queue):
     async def pick(self) -> Optional[Task]:
         now = self.time()
         tasks = [task for task in self.content.values()
-                 if not task.picked_at and task.scheduled_at <= now]
+                 if task.scheduled_at <= now and (not task.picked_at or (
+                     task.picked_at + task.timeout <= now))]
 
         if not tasks:
             return None
