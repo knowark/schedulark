@@ -7,7 +7,7 @@ class Job(Protocol):
     lane: str = ''
     timeout: int = 300
     backoff: int = 3
-    retries: int = 12
+    retries: int = 3
     frequency: str = '* * * * *'
     payload: dict = {}
 
