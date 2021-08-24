@@ -51,6 +51,8 @@ async def test_scheduler_schedule():
             return {}
 
     class BetaJob:
+        frequency = '* * * * *'
+
         async def __call__(self, task: Task) -> Dict:
             return {}
 

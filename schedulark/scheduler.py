@@ -44,7 +44,7 @@ class Scheduler:
     async def schedule(self) -> None:
         moment = datetime.now(timezone.utc)
         for name, job in self.registry.items():
-            frequency = getattr(job, 'frequency', '* * * * *')
+            frequency = getattr(job, 'frequency', '')
             if not cronable(frequency, moment):
                 continue
 
